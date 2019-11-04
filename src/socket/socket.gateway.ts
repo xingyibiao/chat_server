@@ -48,7 +48,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       roomName,
     }
   }
-  
+
   @SubscribeMessage('message')
   handleMessage(client: any, payload: any): string {
     return 'Hello world!';
@@ -74,7 +74,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       console.log(isPublisher);
       return isPublisher;
-      
+
     } catch(e) {
       console.error(e)
     }
@@ -94,5 +94,13 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (!sender) return;
     this.server.in(roomName).emit('candidate', { data, sender });
+  }
+
+  @SubscribeMessage('call')
+  handlerCall(client: Socket, data: any) {
+    const { sender, roomName } = this.getUserInfoBySId(client.id);
+
+    if (!sender) return;
+    this.server.in(roomName).emit('call', { sender });
   }
 }
