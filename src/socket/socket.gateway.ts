@@ -85,7 +85,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { sender, roomName } = this.getUserInfoBySId(client.id);
 
     if (!sender) return;
-    this.server.in(roomName).emit('send_sdp', { data, sender });
+    client.to(roomName).emit('send_sdp', { data, sender });
   }
 
   @SubscribeMessage('candidate')
@@ -93,7 +93,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { sender, roomName } = this.getUserInfoBySId(client.id);
 
     if (!sender) return;
-    this.server.in(roomName).emit('candidate', { data, sender });
+    client.to(roomName).emit('candidate', { data, sender });
   }
 
   @SubscribeMessage('call')
@@ -101,6 +101,15 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { sender, roomName } = this.getUserInfoBySId(client.id);
 
     if (!sender) return;
-    this.server.in(roomName).emit('call', { sender });
+    client.to(roomName).emit('call', { sender });
+  }
+
+  @SubscribeMessage('chat')
+  handlerChat(client: Socket, msg: string) {
+    const { sender, roomName } = this.getUserInfoBySId(client.id);
+
+    if (!sender) return;
+    client.to(roomName).emit('chat', msg);
+    return msg;
   }
 }
