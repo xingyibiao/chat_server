@@ -1,11 +1,17 @@
-import { SubscribeMessage, WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import {
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 
 type UserInfo = {
-  sessionId: string,
-  userName: string,
-  roomName: string,
-}
+  sessionId: string;
+  userName: string;
+  roomName: string;
+};
 
 @WebSocketGateway({ transports: ['websocket'] })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -15,38 +21,38 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private roomMap: Map<string, UserInfo[]> = new Map();
 
   handleConnection(client: Socket) {
-    console.log('加入网关', client.id)
+    console.log('加入网关', client.id);
   }
 
   handleDisconnect(client: Socket) {
-    console.log('离开网关', client.id)
+    console.log('离开网关', client.id);
     this.roomMap.forEach((room, key) => {
       room.forEach((user, i) => {
         if (user.sessionId === client.id) {
-          const users = this.roomMap.get(key)
-          this.roomMap.set(key, users.splice(i, 1))
-          console.log(this.roomMap)
+          const users = this.roomMap.get(key);
+          this.roomMap.set(key, users.splice(i, 1));
+          console.log(this.roomMap);
         }
-      })
-    })
+      });
+    });
   }
 
   private getUserInfoBySId(sessionId: string) {
     let sender: string;
     let roomName: string;
     this.roomMap.forEach((room, key) => {
-      room.forEach((user) => {
+      room.forEach(user => {
         if (user.sessionId === sessionId) {
           sender = user.userName;
           roomName = key;
         }
-      })
-    })
+      });
+    });
 
     return {
       sender,
       roomName,
-    }
+    };
   }
 
   @SubscribeMessage('message')
@@ -55,28 +61,31 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('login')
-  handlerLogin(client: Socket, payload: any): boolean {
+  handlerLogin(
+    client: Socket,
+    payload: any,
+  ): { success: boolean; isPublisher?: boolean } {
     const [userName, roomName] = payload;
     try {
       client.join(roomName);
       const userRoom = this.roomMap.get(roomName);
       const isPublisher = Array.isArray(userRoom) && userRoom.length > 0;
-      const room = this.roomMap.get(roomName)
+      const room = this.roomMap.get(roomName);
       const user: UserInfo = {
         sessionId: client.id,
         userName,
         roomName,
-      }
+      };
       if (room) {
-        room.push(user)
+        room.push(user);
       } else {
-        this.roomMap.set(roomName, [user])
+        this.roomMap.set(roomName, [user]);
       }
       console.log(isPublisher);
-      return isPublisher;
-
-    } catch(e) {
-      console.error(e)
+      return { success: true, isPublisher };
+    } catch (e) {
+      console.error(e);
+      return { success: false };
     }
   }
 
