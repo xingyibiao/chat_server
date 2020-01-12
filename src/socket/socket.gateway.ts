@@ -68,11 +68,22 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const [userName, roomName] = payload;
     try {
       client.join(roomName);
+      const sessionId = client.id;
       const userRoom = this.roomMap.get(roomName);
-      const isPublisher = Array.isArray(userRoom) && userRoom.length > 0;
+      let isListener = true;
+
+      // 去重
+      if (Array.isArray(userRoom)) {
+        userRoom.forEach((u , i) => {
+          if (u.userName === userName) {
+            userRoom.splice(i, 1);
+          }
+        });
+      }
+      isListener = Array.isArray(userRoom) && userRoom.length > 0;
       const room = this.roomMap.get(roomName);
       const user: UserInfo = {
-        sessionId: client.id,
+        sessionId,
         userName,
         roomName,
       };
@@ -81,8 +92,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         this.roomMap.set(roomName, [user]);
       }
-      console.log(isPublisher);
-      return { success: true, isPublisher };
+      return { success: true, isPublisher: !isListener };
     } catch (e) {
       console.error(e);
       return { success: false };
@@ -108,9 +118,9 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('call')
   handlerCall(client: Socket, data: any) {
     const { sender, roomName } = this.getUserInfoBySId(client.id);
-
     if (!sender) return;
     client.to(roomName).emit('call', { sender });
+    return { success: true };
   }
 
   @SubscribeMessage('chat')
