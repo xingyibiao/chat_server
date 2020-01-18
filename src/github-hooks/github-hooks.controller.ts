@@ -32,9 +32,12 @@ export class GithubHooksController {
       return this.handlerError(res, 'not Auth');
     }
 
+    console.log('start verify');
     if (!this.verify(SECRET, req.body, signature)) {
+      console.log('verify error');
       return this.handlerError(res, 'not Auth');
     }
+    console.log('verify success');
 
     res.writeHead(200, { 'content-type': 'application/json' });
     res.send({ ok: true });
