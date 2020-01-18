@@ -43,9 +43,10 @@ export class GithubHooksController {
     // res.writeHead(200, { 'content-type': 'application/json' });
     if (event === 'push') {
       console.log('before deploy');
-      this.deploy('blog');
+      this.deploy(repository);
     }
-    res.send({ ok: true });
+    res.status(204);
+    res.end();
 
   }
 
