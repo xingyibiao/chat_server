@@ -36,7 +36,7 @@ describe('GithubHooks Controller', () => {
       foo: 'bar',
     };
 
-    expect(controller.verify('mysecret', payload, 'd03207e4b030cf234e3447bac4d93add4c6643d8')).toBe(true);
+    expect(controller.verify('mysecret', payload, 'sha1=d03207e4b030cf234e3447bac4d93add4c6643d8')).toBe(true);
   });
 
   it('test run cmd', async () => {

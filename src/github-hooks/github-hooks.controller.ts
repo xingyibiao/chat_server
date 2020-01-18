@@ -16,7 +16,6 @@ export class GithubHooksController {
 
   @Post('/')
   handlerWebHooks(@Req() req, @Response() res) {
-    // TODO impl it
     const { headers } = req;
     const delivery = headers['x-github-delivery'];
     const signature = headers['x-hub-signature'];
@@ -53,7 +52,7 @@ export class GithubHooksController {
   public verify(secret: string, payload: object | string, signature: string) {
     const data = typeof payload === 'string' ? payload : JSON.stringify(payload);
     const signatureBuffer = Buffer.from(signature);
-    const verifyBuffer = Buffer.from(this.sign(data, secret));
+    const verifyBuffer = Buffer.from(`sha1=${this.sign(data, secret)}`);
     if (signatureBuffer.length !== verifyBuffer.length) {
       return false;
     }
