@@ -90,8 +90,8 @@ export class GithubHooksController {
     return new Promise((resolve, reject) => {
       console.log(cmd, ...args);
       const shell = spawn(cmd, args);
-      shell.stdout.on('data', (e) => console.log(e));
-      shell.stderr.on('data', (e) => console.error(e));
+      shell.stdout.on('data', (e) => console.log(e.toString()));
+      shell.stderr.on('data', (e) => console.error(e.toString()));
       shell.on('close', (code) => {
         if (code !== 0) {
           console.error(`${cmd} ${args} error, code: ${code}`);
