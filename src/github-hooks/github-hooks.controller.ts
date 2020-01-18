@@ -21,6 +21,7 @@ export class GithubHooksController {
     const signature = headers['x-hub-signature'];
     const event = headers['x-github-event'];
     const ua = headers['user-agent'];
+    const { repository } = req.body;
 
     if (event === 'ping') {
       res.status(204);
@@ -43,7 +44,7 @@ export class GithubHooksController {
     res.end({ ok: true });
 
     if (event === 'push') {
-      this.deploy(req.body.repository);
+      this.deploy(repository);
     }
   }
 
