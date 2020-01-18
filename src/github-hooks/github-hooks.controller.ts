@@ -89,7 +89,10 @@ export class GithubHooksController {
   public runCmd(cmd: string, args: string[]) {
     return new Promise((resolve, reject) => {
       console.log(cmd, ...args);
-      const shell = spawn(cmd, args);
+      const shell = spawn(cmd, args, {
+        stdio: 'inherit',
+        shell: true,
+      });
       shell.stdout.on('data', (e) => console.log(e.toString()));
       shell.stderr.on('data', (e) => console.error(e.toString()));
       shell.on('close', (code) => {
