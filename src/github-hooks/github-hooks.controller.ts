@@ -43,7 +43,7 @@ export class GithubHooksController {
     // res.writeHead(200, { 'content-type': 'application/json' });
     if (event === 'push') {
       console.log('before deploy');
-      this.deploy(repository);
+      this.deploy(repository.name);
     }
     res.status(204);
     res.end();
@@ -74,8 +74,7 @@ export class GithubHooksController {
     if (!repository) {
       return;
     }
-    const [userName, repositoryName] = repository.split('/');
-    if (repositoryName === 'blog') {
+    if (repository === 'blog') {
       console.log('deloy blog start');
       this.deployBlog();
     }
