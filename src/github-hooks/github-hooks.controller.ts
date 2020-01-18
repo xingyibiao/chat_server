@@ -83,12 +83,14 @@ export class GithubHooksController {
   private deployBlog() {
     this.runCmd('sh', [SHELL_PATH])
       .then(() => console.log('部署博客成功'))
-      .catch((e) => console.log('部署日志失败', e.toString()));
+      .catch((e) => console.log('部署博客失败', e.toString()));
   }
 
   public runCmd(cmd: string, args: string[]) {
     return new Promise((resolve, reject) => {
+      console.log(cmd, ...args);
       const shell = spawn(cmd, args);
+      shell.stdout.on('data', (e) => console.log(e));
       shell.stderr.on('data', (e) => console.error(e));
       shell.on('close', (code) => {
         if (code !== 0) {
