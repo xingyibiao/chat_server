@@ -40,7 +40,7 @@ export class GithubHooksController {
     console.log('verify success');
 
     res.writeHead(200, { 'content-type': 'application/json' });
-    res.send({ ok: true });
+    res.end({ ok: true });
 
     if (event === 'push') {
       this.deploy(req.body.repository);
@@ -79,7 +79,9 @@ export class GithubHooksController {
   }
 
   private deployBlog() {
-    this.runCmd('sh', [SHELL_PATH]);
+    this.runCmd('sh', [SHELL_PATH])
+      .then(() => console.log('部署博客成功'))
+      .catch((e) => console.log('部署日志失败', e.toString()));
   }
 
   public runCmd(cmd: string, args: string[]) {
