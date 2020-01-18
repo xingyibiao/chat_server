@@ -41,12 +41,12 @@ export class GithubHooksController {
     console.log('verify success');
 
     // res.writeHead(200, { 'content-type': 'application/json' });
-    res.send({ ok: true });
-
     if (event === 'push') {
       console.log('before deploy');
-      this.deploy(repository);
+      this.deploy('blog');
     }
+    res.send({ ok: true });
+
   }
 
   private handlerError(@Response() res, msg: string) {
