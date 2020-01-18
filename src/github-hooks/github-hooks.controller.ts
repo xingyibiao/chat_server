@@ -22,6 +22,13 @@ export class GithubHooksController {
     const signature = headers['x-hub-signature'];
     const event = headers['x-github-event'];
     const ua = headers['user-agent'];
+
+    if (event === 'ping') {
+      res.status(204);
+      res.end();
+      return;
+    }
+
     if (!delivery || !signature || !event || !ua.includes('GitHub-Hookshot')) {
       return this.handlerError(res, 'not Auth');
     }
