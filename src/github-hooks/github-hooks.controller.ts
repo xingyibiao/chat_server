@@ -3,9 +3,14 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import bl  = require('bl');
 import * as path from 'path';
 import { spawn } from 'child_process';
+import * as process from 'process';
 
 const SECRET = 'gayhub';
 const SHELL_PATH = path.join('/root/blog', 'deploy.sh');
+const BLOG_DEPLOY = {
+  shellDir: '/root/blog',
+  shellFile: 'deploy.sh',
+};
 
 @Controller('github-hooks')
 export class GithubHooksController {
@@ -81,14 +86,18 @@ export class GithubHooksController {
   }
 
   private deployBlog() {
-    this.runCmd('sh', [SHELL_PATH])
+    const { shellDir, shellFile } = BLOG_DEPLOY;
+    this.runCmd('sh', [shellFile], shellDir)
       .then(() => console.log('部署博客成功'))
       .catch((e) => console.log('部署博客失败', e.toString()));
   }
 
-  public runCmd(cmd: string, args: string[]) {
+  public runCmd(cmd: string, args: string[], pwd?: string) {
     return new Promise((resolve, reject) => {
-      console.log(cmd, ...args);
+      console.log(cmd, ...args, pwd);
+      if (pwd) {
+        process.chdir(pwd);
+      }
       const shell = spawn(cmd, args, {
         stdio: 'inherit',
         shell: true,
