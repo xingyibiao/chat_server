@@ -1,0 +1,6 @@
+language: node.js
+node_js: stable
+install:
+  - yarn
+script:
+  - npm test
