@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Req, Response } from '@nestjs/common';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import bl  = require('bl');
 import * as path from 'path';
 import { spawn } from 'child_process';
@@ -33,24 +33,16 @@ export class GithubHooksController {
       return this.handlerError(res, 'not Auth');
     }
 
-    const [signType, signData] = signature.split('=');
-    req.pipe(new bl((error, data) => {
-      if (error) {
-        return this.handlerError(res, 'server error');
-      }
+    if (!this.verify(SECRET, req.body, signature)) {
+      return this.handlerError(res, 'not Auth');
+    }
 
-      if (signData !== this.sign(signType, data, SECRET)) {
-        return this.handlerError(res, 'not Auth');
-      }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.send({ ok: true });
 
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.send({ ok: true });
-
-      if (event === 'push') {
-        this.deploy(req.body.repository);
-      }
-    }));
-    // if (signData === this.sign(signType, ))
+    if (event === 'push') {
+      this.deploy(req.body.repository);
+    }
   }
 
   private handlerError(@Response() res, msg: string) {
@@ -58,8 +50,19 @@ export class GithubHooksController {
     res.send(msg);
   }
 
-  private sign(type: string, data: Buffer, secret: string) {
-    return createHmac(type, secret).update(data).digest('hex');
+  public verify(secret: string, payload: object | string, signature: string) {
+    const data = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    const signatureBuffer = Buffer.from(signature);
+    const verifyBuffer = Buffer.from(this.sign(data, secret));
+    if (signatureBuffer.length !== verifyBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(signatureBuffer, verifyBuffer);
+  }
+
+  public sign( data: string, secret: string) {
+    return createHmac('sha1', secret).update(data).digest('hex');
   }
 
   private deploy(repository: string) {
@@ -77,7 +80,7 @@ export class GithubHooksController {
     this.runCmd('sh', [SHELL_PATH]);
   }
 
-  private runCmd(cmd: string, args: string[]) {
+  public runCmd(cmd: string, args: string[]) {
     return new Promise((resolve, reject) => {
       const shell = spawn(cmd, args);
       shell.stderr.on('data', (e) => console.error(e));
