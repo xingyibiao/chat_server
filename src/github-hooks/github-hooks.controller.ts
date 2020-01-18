@@ -40,12 +40,13 @@ export class GithubHooksController {
     }
     console.log('verify success');
 
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end({ ok: true });
+    // res.writeHead(200, { 'content-type': 'application/json' });
+    res.send({ ok: true });
 
-    // if (event === 'push') {
-    //   this.deploy('blog');
-    // }
+    if (event === 'push') {
+      console.log('before deploy');
+      this.deploy(repository);
+    }
   }
 
   private handlerError(@Response() res, msg: string) {
