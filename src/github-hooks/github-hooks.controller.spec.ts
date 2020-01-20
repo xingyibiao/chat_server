@@ -39,8 +39,8 @@ describe('GithubHooks Controller', () => {
     expect(controller.verify('mysecret', payload, 'sha1=d03207e4b030cf234e3447bac4d93add4c6643d8')).toBe(true);
   });
 
-  it('test run cmd', async () => {
-    const result = await controller.runCmd('echo', ['hello']);
-    expect(result).toBe(0);
-  });
+  // it('test run cmd', async () => {
+  //   const result = await controller.runCmd('echo', ['hello']);
+  //   expect(result).toBe(0);
+  // });
 });
